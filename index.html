@@ -1,88 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سوبر ماركت برو | الكاشير والمخزن</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نظام إدارة السوبر ماركت</title>
     <style>
         :root {
             --main: #2c3e50;
             --green: #27ae60;
-            --red: #e74c3c;
+            --light: #f4f7f6;
         }
 
         body {
-            font-family: sans-serif;
-            background: #f4f4f4;
+            font-family: "Segoe UI", sans-serif;
+            background: var(--light);
             margin: 0;
             padding: 20px;
         }
 
-        .grid {
+        .container {
+            max-width: 1200px;
+            margin: auto;
             display: grid;
-            grid-template-columns: 1fr 350px;
+            grid-template-columns: 1fr 380px;
             gap: 20px;
         }
 
         .card {
             background: white;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         }
 
-        h2 {
-            border-bottom: 2px solid var(--green);
-            padding-bottom: 5px;
-            color: var(--main);
-        }
-
-        input,
-        select {
-            padding: 10px;
-            margin: 5px 0;
-            width: 95%;
+        input {
+            padding: 12px;
+            margin: 5px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
+            width: 150px;
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
-            color: white;
+            border-radius: 8px;
             cursor: pointer;
-            border-radius: 5px;
+            font-weight: bold;
         }
 
         .btn-add {
             background: var(--main);
+            color: white;
         }
 
         .btn-pay {
             background: var(--green);
+            color: white;
             width: 100%;
             font-size: 1.2rem;
-        }
-
-        .product-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
             margin-top: 20px;
         }
 
-        .item-card {
-            background: #fff;
-            border: 1px solid #eee;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 8px;
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        .item-card:hover {
+        .product-item {
+            background: white;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .product-item:hover {
             border-color: var(--green);
+            transform: translateY(-3px);
         }
 
         .cart-item {
@@ -92,8 +92,8 @@
             border-bottom: 1px solid #eee;
         }
 
-        @media (max-width: 800px) {
-            .grid {
+        @media (max-width: 900px) {
+            .container {
                 grid-template-columns: 1fr;
             }
         }
@@ -101,109 +101,136 @@
 </head>
 
 <body>
-
-    <div class="grid">
-        <div>
+    <div class="container">
+        <div class="main-content">
             <div class="card">
                 <h2>إضافة منتج جديد للمخزن</h2>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <input type="text" id="pName" placeholder="اسم المنتج" style="width: 200px;">
-                    <input type="number" id="pPrice" placeholder="سعر الجمله" style="width: 80px;">
-                    <input type="number" id="sellPrice" placeholder="سعر البيع" style="width: 80px;">
-                    <input type="number" id="pStock" placeholder="الكمية" style="width: 80px;">
-                    <button class="btn btn-add" onclick="saveToSheet()">حفظ في جوجل شيت</button>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px">
+                    <input type="text" id="pName" placeholder="اسم المنتج" />
+                    <input type="number" id="pPrice" placeholder="سعر الشراء" />
+                    <input type="number" id="pSellPrice" placeholder="سعر البيع" />
+                    <input type="number" id="pStock" placeholder="الكمية" />
+                    <button class="btn btn-add" onclick="saveProduct()">
+                        حفظ في جوجل شيت
+                    </button>
                 </div>
             </div>
 
-            <div class="card" style="margin-top: 20px;">
-                <h2>المنتجات في المخزن (اضغط للبيع)</h2>
-                <div id="stockContainer" class="product-list">جاري تحميل المخزن...</div>
+            <div class="card" style="margin-top: 20px">
+                <h2>المخزن الحالي (اضغط للبيع)</h2>
+                <div id="productsDisplay" class="product-grid">جاري التحميل...</div>
             </div>
         </div>
 
         <div class="card">
-            <h2>الفاتورة</h2>
-            <div id="cartItems" style="min-height: 200px;">
+            <h2>فاتورة الكاشير</h2>
+            <div id="cartList" style="min-height: 250px"></div>
+            <div style="
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-top: 2px solid #eee;
+            padding-top: 15px;
+          ">
+                الإجمالي: <span id="grandTotal">0</span> ج.م
             </div>
-            <hr>
-            <div style="font-size: 1.5rem; font-weight: bold; margin: 15px 0;">
-                الإجمالي: <span id="totalPrice">0</span> ج.م
-            </div>
-            <button class="btn btn-pay" onclick="processSale()">إتمام البيع (خصم من الشيت)</button>
+            <button class="btn btn-pay" onclick="confirmSale()">
+                تأكيد العملية وخصم المخزن
+            </button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwY5nuutJUUx8vaZFbtXX7Lfn9wGcYa_2th_3Rn7Ag1ZXgBGeA3WY9_pGGDDl0S9ln2iw/exec";
+        const API =
+            "https://script.google.com/macros/s/AKfycby6u9nwb_MTYtoaYWegczApnJ6VPXzfBWaeTNnwc6H2i2XxBGmYUk_0h9wF0l9lNALhxQ/exec";
         let cart = [];
 
-        // 1. جلب المنتجات من الشيت
-        async function loadStock() {
-            const res = await fetch(SCRIPT_URL);
+        // جلب البيانات
+        async function fetchStock() {
+            const res = await fetch(API);
             const data = await res.json();
-            const container = document.getElementById('stockContainer');
-            container.innerHTML = '';
-            data.forEach(row => {
-                container.innerHTML += `
-                <div class="item-card" onclick="addToCart('${row[1]}', ${row[3]})">
-                    <b>${row[1]}</b><br>
-                    <span style="color:var(--green)">${row[3]} ج.م</span><br>
-                    <small>متاح: ${row[4]}</small>
-                </div>`;
+            const display = document.getElementById("productsDisplay");
+            display.innerHTML = data
+                .map(
+                    (row) => `
+            <div class="product-item" onclick="addToCart('${row[1]}', ${row[3]})">
+                <b>${row[1]}</b><br>
+                <span style="color:var(--green)">${row[3]} ج.م</span><br>
+                <small>متاح: ${row[4]}</small>
+            </div>
+        `,
+                )
+                .join("");
+        }
+
+        // إضافة منتج جديد
+        async function saveProduct() {
+            const name = document.getElementById("pName").value;
+            const buy = parseFloat(document.getElementById("pPrice").value);
+            const sell = parseFloat(document.getElementById("pSellPrice").value);
+            const stock = parseInt(document.getElementById("pStock").value);
+
+            if (!name || !buy || !sell) return alert("أكمل البيانات");
+
+            await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "add",
+                    name,
+                    price: buy,
+                    sellPrice: sell,
+                    stock,
+                    profit: (sell - buy) * stock,
+                }),
             });
+            alert("تمت الإضافة");
+            fetchStock();
         }
 
-        // 2. إضافة منتج جديد للشيت
-        async function saveToSheet() {
-            const name = document.getElementById('pName').value;
-            const price = document.getElementById('pPrice').value;
-            const stock = document.getElementById('pStock').value;
-            const sellPrice = document.getElementById('sellPrice').value;
-            const profit = (sellPrice - price) * stock
-
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: "add", name, price, sellPrice, stock, profit })
-            });
-            alert("تمت الإضافة للمخزن");
-            loadStock();
+        // الكاشير
+        function addToCart(name, price) {
+            const item = cart.find((i) => i.name === name);
+            if (item) item.quantity++;
+            else cart.push({ name, price, quantity: 1 });
+            renderCart();
         }
 
-        // 3. إدارة السلة
-        function addToCart(name, sellPrice) {
-            const found = cart.find(i => i.name === name);
-            if (found) found.quantity++;
-            else cart.push({ name, sellPrice, quantity: 1 });
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const container = document.getElementById('cartItems');
-            const sellPrice = document.getElementById('sellPrice').value;
-            container.innerHTML = cart.map(i => `
+        function renderCart() {
+            const list = document.getElementById("cartList");
+            list.innerHTML = cart
+                .map(
+                    (i) => `
             <div class="cart-item">
                 <span>${i.name} (x${i.quantity})</span>
-                <span>${i.sellPrice * i.quantity} ج.م</span>
+                <span>${i.price * i.quantity} ج.م</span>
             </div>
-        `).join('');
-            const total = cart.reduce((s, i) => s + (i.sellPrice * i.quantity), 0);
-            document.getElementById('totalPrice').innerText = total;
+        `,
+                )
+                .join("");
+            const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            document.getElementById("grandTotal").innerText = total;
         }
 
-        // 4. إتمام البيع والخصم
-        async function processSale() {
+        // إتمام البيع
+        async function confirmSale() {
             if (cart.length === 0) return;
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: "sell", items: cart })
+            const btn = document.querySelector(".btn-pay");
+            btn.innerText = "جاري التحديث...";
+            btn.disabled = true;
+
+            await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action: "sell", items: cart }),
             });
-            alert("تم البيع وخصم الكميات من المخزن!");
+
+            alert("تم البيع وتحديث المخزن بنجاح!");
             cart = [];
-            updateCartUI();
-            loadStock(); // تحديث الأرقام المعروضة
+            renderCart();
+            fetchStock();
+            btn.innerText = "تأكيد العملية وخصم المخزن";
+            btn.disabled = false;
         }
 
-        window.onload = loadStock;
+        window.onload = fetchStock;
     </script>
 </body>
 
